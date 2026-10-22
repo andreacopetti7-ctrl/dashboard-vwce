@@ -1,5 +1,4 @@
-Python 3.15.1 (v3.15.1:c37e74cb6bc, Oct 20 2026, 23:21:44) [Clang 21.0.0 (clang-2100.1.1.101)] on darwin
-Enter "help" below or click "Help" above for more information.
+Python 
 import streamlit as st
 import yfinance as yf
 import pandas as pd
