@@ -7,167 +7,257 @@ import plotly.express as px
 from datetime import datetime, timedelta
 
 # ---------------------------------------------------------
-# CONFIGURAZIONE STILE AVANZATO TERMINALE
+# SETUP PAGINA & CSS ULTRA-PROFESSIONALE (BLOOMBERG/TRADINGVIEW STYLE)
 # ---------------------------------------------------------
 st.set_page_config(
-    page_title="VWCE Pro Financial Terminal",
-    page_icon="📊",
+    page_title="VWCE Bloomberg-Style Terminal",
+    page_icon="⚡",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
 
-# Custom CSS per rispecchiare il layout del Terminale Finanziario
 st.markdown("""
 <style>
-    .stApp { background-color: #0b0e14; color: #e6edf3; }
-    div[data-testid="stMetric"] {
-        background: linear-gradient(135deg, #161b22 0%, #0d1117 100%);
-        border: 1px solid #30363d;
-        border-radius: 10px;
-        padding: 15px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    /* Reset & Dark Theme Base */
+    .stApp {
+        background-color: #080a0f !important;
+        color: #d1d5db !important;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
-    div[data-testid="stMetricLabel"] { color: #8b949e; font-size: 0.85rem; font-weight: 600; }
-    div[data-testid="stMetricValue"] { font-size: 1.6rem; font-weight: 700; color: #58a6ff; }
-    .status-card {
-        background-color: #161b22;
-        border-left: 4px solid #238636;
-        padding: 12px 20px;
-        border-radius: 6px;
-        margin-bottom: 20px;
+    
+    /* Header Personalizzato */
+    .terminal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #111827;
+        padding: 10px 20px;
+        border-radius: 8px;
+        border: 1px solid #1f2937;
+        margin-bottom: 15px;
+    }
+    .terminal-title {
+        font-size: 1.3rem;
+        font-weight: 800;
+        color: #38bdf8;
+        letter-spacing: 0.5px;
+    }
+    .live-badge {
+        background-color: #064e3b;
+        color: #34d399;
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        border: 1px solid #059669;
+    }
+
+    /* Cards e Metriche ad Alta Densità */
+    div[data-testid="stMetric"] {
+        background: #111827 !important;
+        border: 1px solid #1f2937 !important;
+        border-radius: 8px !important;
+        padding: 10px 14px !important;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+    }
+    div[data-testid="stMetricLabel"] {
+        color: #9ca3af !important;
+        font-size: 0.75rem !important;
+        font-weight: 600 !important;
+        text-transform: uppercase;
+    }
+    div[data-testid="stMetricValue"] {
+        font-size: 1.3rem !important;
+        font-weight: 700 !important;
+        color: #f3f4f6 !important;
+    }
+    
+    /* Riduzione spaziature bianche di Streamlit */
+    .block-container {
+        padding-top: 1rem !important;
+        padding-bottom: 1rem !important;
+        max-width: 98% !important;
+    }
+    
+    /* Stile Tab */
+    button[data-baseweb="tab"] {
+        font-size: 0.85rem !important;
+        font-weight: 600 !important;
+        color: #9ca3af !important;
+        background-color: transparent !important;
+    }
+    button[aria-selected="true"] {
+        color: #38bdf8 !important;
+        border-bottom-color: #38bdf8 !important;
     }
 </style>
 """, unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# DATI E TICKER
+# DATI & TICKER
 # ---------------------------------------------------------
 VWCE_TICKER = "VWCE.DE"
 
 HOLDINGS_DATA = [
-    {"Azienda": "Apple Inc.", "Ticker": "AAPL", "Settore": "Tecnologia", "Peso": 4.5},
-    {"Azienda": "Microsoft Corp.", "Ticker": "MSFT", "Settore": "Tecnologia", "Peso": 3.6},
-    {"Azienda": "NVIDIA Corp.", "Ticker": "NVDA", "Settore": "Tecnologia", "Peso": 3.2},
-    {"Azienda": "Amazon.com", "Ticker": "AMZN", "Settore": "Beni di Consumo", "Peso": 2.3},
-    {"Azienda": "Alphabet Inc.", "Ticker": "GOOGL", "Settore": "Tecnologia", "Peso": 2.1},
-    {"Azienda": "TSMC", "Ticker": "TSM", "Settore": "Tecnologia", "Peso": 1.8},
-    {"Azienda": "Meta Platforms", "Ticker": "META", "Settore": "Tecnologia", "Peso": 1.5},
-    {"Azienda": "Tesla Inc.", "Ticker": "TSLA", "Settore": "Beni di Consumo", "Peso": 1.0},
-    {"Azienda": "Lockheed Martin", "Ticker": "LMT", "Settore": "Difesa & Industriale", "Peso": 0.3},
-    {"Azienda": "IBM", "Ticker": "IBM", "Settore": "Tecnologia", "Peso": 0.2}
+    {"Azienda": "Apple", "Ticker": "AAPL", "Settore": "Tech", "Peso": 4.5},
+    {"Azienda": "Microsoft", "Ticker": "MSFT", "Settore": "Tech", "Peso": 3.6},
+    {"Azienda": "NVIDIA", "Ticker": "NVDA", "Settore": "Tech", "Peso": 3.2},
+    {"Azienda": "Amazon", "Ticker": "AMZN", "Settore": "Consumi", "Peso": 2.3},
+    {"Azienda": "Alphabet", "Ticker": "GOOGL", "Settore": "Tech", "Peso": 2.1},
+    {"Azienda": "TSMC", "Ticker": "TSM", "Settore": "Tech", "Peso": 1.8},
+    {"Azienda": "Meta", "Ticker": "META", "Settore": "Tech", "Peso": 1.5},
+    {"Azienda": "Tesla", "Ticker": "TSLA", "Settore": "Consumi", "Peso": 1.0},
+    {"Azienda": "Broadcom", "Ticker": "AVGO", "Settore": "Tech", "Peso": 0.9},
+    {"Azienda": "Lockheed M.", "Ticker": "LMT", "Settore": "Difesa", "Peso": 0.3},
+    {"Azienda": "Rheinmetall", "Ticker": "RHM.DE", "Settore": "Difesa", "Peso": 0.2}
 ]
 
-@st.cache_data(ttl=900)
-def fetch_market_data():
+@st.cache_data(ttl=600)
+def get_terminal_data():
     etf = yf.Ticker(VWCE_TICKER)
     hist = etf.history(period="1y")
     
-    # Dati live delle holding
-    holdings_df = pd.DataFrame(HOLDINGS_DATA)
-    perf_list = []
-    for symbol in holdings_df['Ticker']:
+    # Prende variazioni live delle holding
+    df_h = pd.DataFrame(HOLDINGS_DATA)
+    changes = []
+    prices = []
+    for t_sym in df_h['Ticker']:
         try:
-            t = yf.Ticker(symbol)
-            h = t.history(period="2d")
+            h = yf.Ticker(t_sym).history(period="2d")
             if len(h) >= 2:
-                c = h['Close'].iloc[-1]
-                p = h['Close'].iloc[-2]
-                perf_list.append(((c - p) / p) * 100)
+                c, p = h['Close'].iloc[-1], h['Close'].iloc[-2]
+                prices.append(round(c, 2))
+                changes.append(round(((c - p) / p) * 100, 2))
             else:
-                perf_list.append(0.0)
+                prices.append(0.0)
+                changes.append(0.0)
         except Exception:
-            perf_list.append(0.0)
+            prices.append(0.0)
+            changes.append(0.0)
             
-    holdings_df['Variazione %'] = [round(x, 2) for x in perf_list]
-    return hist, holdings_df, etf.news
+    df_h['Prezzo'] = prices
+    df_h['Var 1G (%)'] = changes
+    return hist, df_h, etf.news
 
-hist_etf, df_holdings, news_list = fetch_market_data()
+hist_etf, df_holdings, news_list = get_terminal_data()
 
 # ---------------------------------------------------------
-# HEADER DEL TERMINALE
+# TERMINAL HEADER BAR
 # ---------------------------------------------------------
-st.title("⚡ VWCE Interactive Financial Terminal")
-st.markdown("""
-<div class="status-card">
-    <b>Stato del Sistema:</b> Connessione Live ai Mercati attiva | Aggiornato automaticamente ad ogni sessione di Borsa.
+st.markdown(f"""
+<div class="terminal-header">
+    <div class="terminal-title">⚡ VWCE PRO FINANCIAL TERMINAL</div>
+    <div style="font-size: 0.8rem; color: #9ca3af;">XETRA: VWCE.DE | ISIN: IE00BK5BQT80</div>
+    <div class="live-badge">● LIVE DATA STREAM</div>
 </div>
 """, unsafe_allow_html=True)
 
+# ---------------------------------------------------------
+# METRICHE PRINCIPALI IN PRIMO PIANO
+# ---------------------------------------------------------
 if not hist_etf.empty:
     price = hist_etf['Close'].iloc[-1]
     prev = hist_etf['Close'].iloc[-2]
     chg = price - prev
     pct = (chg / prev) * 100
     
-    returns = hist_etf['Close'].pct_change().dropna()
-    vol = returns.std() * np.sqrt(252) * 100
-    sharpe = (returns.mean() * 252) / (returns.std() * np.sqrt(252))
+    ret = hist_etf['Close'].pct_change().dropna()
+    vol = ret.std() * np.sqrt(252) * 100
+    sharpe = (ret.mean() * 252) / (ret.std() * np.sqrt(252))
 
-    c1, c2, c3, c4, c5 = st.columns(5)
-    c1.metric("Prezzo VWCE", f"{price:.2f} €", f"{chg:+.2f} € ({pct:+.2f}%)")
-    c2.metric("Volatilità Annua", f"{vol:.2f}%")
+    c1, c2, c3, c4, c5, c6 = st.columns(6)
+    c1.metric("Prezzo", f"{price:.2f} €", f"{chg:+.2f} € ({pct:+.2f}%)")
+    c2.metric("Volatilità (1A)", f"{vol:.2f}%")
     c3.metric("Sharpe Ratio", f"{sharpe:.2f}")
-    c4.metric("Massimo 52 Settimane", f"{hist_etf['High'].max():.2f} €")
-    c5.metric("Minimo 52 Settimane", f"{hist_etf['Low'].min():.2f} €")
+    c4.metric("Max 52W", f"{hist_etf['High'].max():.2f} €")
+    c5.metric("Min 52W", f"{hist_etf['Low'].min():.2f} €")
+    c6.metric("Volumi Oggi", f"{int(hist_etf['Volume'].iloc[-1]):,}")
 
-st.markdown("---")
-
-# ---------------------------------------------------------
-# TREEMAP INTERATTIVA & TOP HOLDINGS (COME NELL'ANTEPRIMA)
-# ---------------------------------------------------------
-st.subheader("🗺️ Treemap Interattiva del Portafoglio & Impatto Giornaliero")
-st.caption("Dimensioni = Peso nel VWCE (%) | Colore = Andamento percentuale della seduta odierna")
-
-fig_tree = px.treemap(
-    df_holdings,
-    path=[px.Constant("VWCE Global"), 'Settore', 'Azienda'],
-    values='Peso',
-    color='Variazione %',
-    color_continuous_scale=['#ff4b4b', '#1f2937', '#00c853'],
-    color_continuous_midpoint=0
-)
-fig_tree.update_traces(
-    hovertemplate='<b>%{label}</b><br>Peso nel fondo: %{value}%<br>Variazione Oggi: %{color:.2f}%',
-    textinfo="label+value+percent parent"
-)
-fig_tree.update_layout(template="plotly_dark", height=480, margin=dict(l=10, r=10, t=10, b=10))
-st.plotly_chart(fig_tree, use_container_width=True)
+st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# ANALISI STORICA & RISCHIO GEOPOLITICO
+# LAYOUT PRINCIPALE A 2 COLONNE
 # ---------------------------------------------------------
-col_left, col_right = st.columns([3, 2])
+col_main, col_side = st.columns([7, 3])
 
-with col_left:
-    st.subheader("📈 Performance Storica & Medie Mobili")
+with col_main:
+    # Grafico Candele / Linea avanzato
+    st.markdown("##### 📈 Grafico di Borsa Interattivo")
+    
     hist_etf['SMA50'] = hist_etf['Close'].rolling(50).mean()
     hist_etf['SMA200'] = hist_etf['Close'].rolling(200).mean()
     
-    fig_line = go.Figure()
-    fig_line.add_trace(go.Scatter(x=hist_etf.index, y=hist_etf['Close'], name='Prezzo VWCE', line=dict(color='#58a6ff', width=2)))
-    fig_line.add_trace(go.Scatter(x=hist_etf.index, y=hist_etf['SMA50'], name='Media 50gg', line=dict(color='#d29922', width=1)))
-    fig_line.add_trace(go.Scatter(x=hist_etf.index, y=hist_etf['SMA200'], name='Media 200gg', line=dict(color='#f85149', width=1)))
-    fig_line.update_layout(template="plotly_dark", height=400, margin=dict(l=10, r=10, t=10, b=10))
-    st.plotly_chart(fig_line, use_container_width=True)
+    fig = go.Figure()
+    fig.add_trace(go.Candlestick(
+        x=hist_etf.index, open=hist_etf['Open'], high=hist_etf['High'],
+        low=hist_etf['Low'], close=hist_etf['Close'], name='VWCE Price'
+    ))
+    fig.add_trace(go.Scatter(x=hist_etf.index, y=hist_etf['SMA50'], name='SMA 50', line=dict(color='#f59e0b', width=1.5)))
+    fig.add_trace(go.Scatter(x=hist_etf.index, y=hist_etf['SMA200'], name='SMA 200', line=dict(color='#ef4444', width=1.5)))
+    
+    fig.update_layout(
+        template="plotly_dark",
+        paper_bgcolor="#111827",
+        plot_bgcolor="#111827",
+        height=420,
+        margin=dict(l=10, r=10, t=10, b=10),
+        xaxis_rangeslider_visible=False,
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+    )
+    st.plotly_chart(fig, use_container_width=True)
+    
+    # Treemap Densità Portafoglio
+    st.markdown("##### 🗺️ Mappa ad Albero (Treemap) Costituenti & Impatto")
+    fig_tree = px.treemap(
+        df_holdings,
+        path=[px.Constant("VWCE Holdings"), 'Settore', 'Azienda'],
+        values='Peso',
+        color='Var 1G (%)',
+        color_continuous_scale=['#ef4444', '#1f2937', '#10b981'],
+        color_continuous_midpoint=0
+    )
+    fig_tree.update_layout(
+        template="plotly_dark",
+        paper_bgcolor="#111827",
+        height=320,
+        margin=dict(l=5, r=5, t=5, b=5)
+    )
+    st.plotly_chart(fig_tree, use_container_width=True)
 
-with col_right:
-    st.subheader("🛡️ Matrice di Impatto Geopolitico")
-    geo_df = pd.DataFrame([
-        {"Evento Geopolitico": "Tensioni Medio Oriente / Petrolio", "Settore Impattato": "Energia / Difesa", "Impatto VWCE": "Moderato Positive (+)"},
-        {"Evento Geopolitico": "Restrizioni US/Cina Semiconduttori", "Settore Impattato": "Tech / Chip", "Impatto VWCE": "Alta Volatilità (±)"},
-        {"Evento Geopolitico": "Spesa Riarmo Unione Europea", "Settore Impattato": "Industriale / Difesa", "Impatto VWCE": "Copertura Rischio (+)"},
-        {"Evento Geopolitico": "Politica Tassi Banche Centrali", "Settore Impattato": "Finanza / Reits", "Impatto VWCE": "Neutro / Stabile (=)"}
+with col_side:
+    # Tabella Holding Compatta
+    st.markdown("##### 🏢 Top Holdings Live")
+    st.dataframe(
+        df_holdings[['Azienda', 'Peso', 'Var 1G (%)']],
+        hide_index=True,
+        use_container_width=True,
+        height=360
+    )
+    
+    # Rischio Geopolitico
+    st.markdown("##### 🛡️ Matrice Impatto Geopolitico")
+    geo_data = pd.DataFrame([
+        {"Evento": "Tensioni Medio Oriente", "Impatto": "Petrolio / Difesa (+)"},
+        {"Evento": "Restrizioni US/Cina Chip", "Impatto": "Tech / Semiconduttori (±)"},
+        {"Evento": "Spesa Riarmo UE", "Impatto": "Industria Difesa (+)"},
+        {"Evento": "Politica Tassi Fed/BCE", "Impatto": "Banche / Reits (=)"}
     ])
-    st.dataframe(geo_df, hide_index=True, use_container_width=True, height=380)
+    st.dataframe(geo_data, hide_index=True, use_container_width=True, height=220)
 
 # ---------------------------------------------------------
-# FEED NOTIZIE & GEOPOLITICA
+# FEED NOTIZIE IN BASSO
 # ---------------------------------------------------------
 st.markdown("---")
-st.subheader("📰 Notizie ed Eventi Correlati al Mercato Globale")
+st.markdown("##### 📰 Live Market & Geopolitical News Feed")
 if news_list:
-    for item in news_list[:5]:
-        title = item.get('title', 'Nessun titolo')
-        link = item.get('link', '#')
-        publisher = item.get('publisher', 'Fonte sconosciuta')
-        st.markdown(f"🔹 **[{title}]({link})** — *{publisher}*")
+    cols_news = st.columns(3)
+    for idx, item in enumerate(news_list[:3]):
+        with cols_news[idx]:
+            st.markdown(f"""
+            <div style="background: #111827; padding: 12px; border-radius: 6px; border: 1px solid #1f2937; height: 100%;">
+                <div style="font-size: 0.75rem; color: #38bdf8;">{item.get('publisher', 'News')}</div>
+                <div style="font-weight: 600; font-size: 0.85rem; margin-top: 4px;">
+                    <a href="{item.get('link', '#')}" target="_blank" style="color: #f3f4f6; text-decoration: none;">{item.get('title', 'Titolo non disponibile')}</a>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
