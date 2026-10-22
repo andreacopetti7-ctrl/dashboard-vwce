@@ -215,34 +215,34 @@ with tab3:
 with tab4:
     st.subheader("Indicatori di Rischio e Contesto Macroeconomico")
     if not df_macro.empty:
-...         st.dataframe(df_macro, hide_index=True, use_container_width=True)
-... 
-... # TAB 5: SIMULATORE PAC
-... with tab5:
-...     st.subheader("Simulazione Crescita Capitale (PAC)")
-...     months = pac_years * 12
-...     rate = expected_return / 100 / 12
-...     
-...     dates = [datetime.now() + timedelta(days=30*i) for i in range(months)]
-...     invested = [pac_monthly * (i+1) for i in range(months)]
-...     future_val = [pac_monthly * (((1 + rate)**(i+1) - 1) / rate) * (1 + rate) for i in range(months)]
-...     
-...     df_pac = pd.DataFrame({"Data": dates, "Capitale Versato": invested, "Valore Stimato": future_val})
-...     
-...     fig_pac = go.Figure()
-...     fig_pac.add_trace(go.Scatter(x=df_pac["Data"], y=df_pac["Capitale Versato"], name="Versato", line=dict(color='#888888')))
-...     fig_pac.add_trace(go.Scatter(x=df_pac["Data"], y=df_pac["Valore Stimato"], name="Capitale con Interessi", line=dict(color='#00CC66', width=3)))
-...     fig_pac.update_layout(template="plotly_dark", height=400)
-...     st.plotly_chart(fig_pac, use_container_width=True)
-...     
-...     st.success(f"Totale Versato: **{invested[-1]:,.2f} €** | Valore Finale Stimato: **{future_val[-1]:,.2f} €** (Interessi Maturati: **{future_val[-1]-invested[-1]:,.2f} €**)")
-... 
-... # ---------------------------------------------------------
-... # NOTIZIE E FEED GEOPOLITICO (IN BASSO)
-... # ---------------------------------------------------------
-... st.markdown("---")
-... st.subheader("📰 Market & Geopolitical News Feed")
-... if news_vwce:
-...     for n in news_vwce[:5]:
-...         st.markdown(f"🔹 **[{n.get('title')}]({n.get('link')})** — *{n.get('publisher')}*")
-... else:
+         st.dataframe(df_macro, hide_index=True, use_container_width=True)
+
+ # TAB 5: SIMULATORE PAC
+ with tab5:
+     st.subheader("Simulazione Crescita Capitale (PAC)")
+     months = pac_years * 12
+     rate = expected_return / 100 / 12
+     
+     dates = [datetime.now() + timedelta(days=30*i) for i in range(months)]
+     invested = [pac_monthly * (i+1) for i in range(months)]
+     future_val = [pac_monthly * (((1 + rate)**(i+1) - 1) / rate) * (1 + rate) for i in range(months)]
+     
+     df_pac = pd.DataFrame({"Data": dates, "Capitale Versato": invested, "Valore Stimato": future_val})
+     
+     fig_pac = go.Figure()
+     fig_pac.add_trace(go.Scatter(x=df_pac["Data"], y=df_pac["Capitale Versato"], name="Versato", line=dict(color='#888888')))
+     fig_pac.add_trace(go.Scatter(x=df_pac["Data"], y=df_pac["Valore Stimato"], name="Capitale con Interessi", line=dict(color='#00CC66', width=3)))
+     fig_pac.update_layout(template="plotly_dark", height=400)
+     st.plotly_chart(fig_pac, use_container_width=True)
+     
+     st.success(f"Totale Versato: **{invested[-1]:,.2f} €** | Valore Finale Stimato: **{future_val[-1]:,.2f} €** (Interessi Maturati: **{future_val[-1]-invested[-1]:,.2f} €**)")
+ 
+ # ---------------------------------------------------------
+ # NOTIZIE E FEED GEOPOLITICO (IN BASSO)
+ # ---------------------------------------------------------
+ st.markdown("---")
+ st.subheader("📰 Market & Geopolitical News Feed")
+ if news_vwce:
+     for n in news_vwce[:5]:
+         st.markdown(f"🔹 **[{n.get('title')}]({n.get('link')})** — *{n.get('publisher')}*")
+ else:
